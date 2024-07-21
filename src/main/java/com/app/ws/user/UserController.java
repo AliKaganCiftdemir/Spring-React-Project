@@ -1,10 +1,15 @@
 package com.app.ws.user;
 
+import com.app.ws.error.ApiError;
 import com.app.ws.shared.GenericMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 public class UserController {
@@ -14,8 +19,19 @@ public class UserController {
 
 
     @PostMapping("/api/v1/users")
-    GenericMessage createUser(@RequestBody User user) {
+    ResponseEntity<?> createUser(@RequestBody User user) {
+        if (user.getUsername() == null || user.getUsername().isEmpty()) {
+            ApiError apiError = new ApiError();
+            apiError.setStatus(400);
+            apiError.setMessage("Validation error");
+            apiError.setPath("/api/v1/users");
+            Map<String, String> validationErrors = new HashMap<>();
+            validationErrors.put("username", "Username cannot be null");
+            apiError.setValidationErrors(validationErrors);
+            return ResponseEntity.badRequest().body(apiError);
+        }
+
         userService.save(user);
-        return new GenericMessage("User is created");
+        return ResponseEntity.ok(new GenericMessage("User is created"));
     }
 }
