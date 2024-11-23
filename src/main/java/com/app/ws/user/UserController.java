@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 public class UserController {
@@ -31,8 +30,7 @@ public class UserController {
 
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-
-    ResponseEntity<ApiError> handelMethodArgNotValidException(MethodArgumentNotValidException exception) {
+    ResponseEntity<ApiError> handleMethodArgNotValidException(MethodArgumentNotValidException exception) {
         ApiError apiError = new ApiError();
         apiError.setStatus(400);
         apiError.setMessage("Validation error");
@@ -45,4 +43,17 @@ public class UserController {
         apiError.setValidationErrors(validationErrors);
         return ResponseEntity.badRequest().body(apiError);
     }
+
+    @ExceptionHandler(NotUniqueEmailException.class)
+    ResponseEntity<ApiError> handleNotUniqueEmailException(NotUniqueEmailException exception) {
+        ApiError apiError = new ApiError();
+        apiError.setStatus(400);
+        apiError.setMessage("Validation error");
+        apiError.setPath("/api/v1/users");
+        Map<String, String> validationErrors = new HashMap<>();
+        validationErrors.put("email", "E-mail in use");
+        apiError.setValidationErrors(validationErrors);
+        return ResponseEntity.badRequest().body(apiError);
+    }
+
 }
